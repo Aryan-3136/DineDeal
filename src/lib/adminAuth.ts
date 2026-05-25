@@ -3,6 +3,12 @@ import { createSupabaseAdminClient, createSupabaseBrowserClient, hasSupabaseEnv 
 
 type AdminRole = "admin" | "editor" | "viewer";
 const allowedRoles: AdminRole[] = ["admin", "editor", "viewer"];
+type VerifiedAdminUser = {
+  id: string;
+  auth_user_id: string | null;
+  email: string | null;
+  role: AdminRole;
+};
 
 function decodeBase64Url(value: string) {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -57,14 +63,28 @@ export async function getAdminUser(request: NextRequest) {
   const { data: userData, error: userError } = await authClient.auth.getUser(token);
   if (userError || !userData.user) return null;
 
-  const { data: adminUser, error: adminError } = await adminClient
+  const { data: adminUserById, error: adminByIdError } = await adminClient
     .from("admin_users")
     .select("id, auth_user_id, email, role")
     .eq("auth_user_id", userData.user.id)
     .maybeSingle();
 
-  if (adminError) throw adminError;
-  if (!adminUser || !allowedRoles.includes(adminUser.role as AdminRole)) return false;
+  if (adminByIdError) throw adminByIdError;
+
+  let adminUser = adminUserById as VerifiedAdminUser | null;
+  if (!adminUser && userData.user.email) {
+    const { data: adminUserByEmail, error: adminByEmailError } = await adminClient
+      .from("admin_users")
+      .select("id, auth_user_id, email, role")
+      .eq("email", userData.user.email)
+      .maybeSingle();
+
+    if (adminByEmailError) throw adminByEmailError;
+    adminUser = adminUserByEmail as VerifiedAdminUser | null;
+  }
+
+  if (!adminUser) return false;
+  if (!allowedRoles.includes(adminUser.role)) return false;
   return adminUser;
 }
 
