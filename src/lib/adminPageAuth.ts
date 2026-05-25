@@ -44,7 +44,7 @@ function readTokenFromCookies() {
 }
 
 export async function requireAdminPage() {
-  if (!hasSupabaseEnv()) return { authorized: true, denied: false };
+  if (!hasSupabaseEnv()) return { authorized: false, denied: true };
   const token = readTokenFromCookies();
   if (!token) redirect("/admin/login");
   const result = await verifyAdminAccessToken(token);
