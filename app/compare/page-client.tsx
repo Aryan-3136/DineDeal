@@ -1,24 +1,28 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { BestDealCard } from "@/components/BestDealCard";
 import { OfferComparisonTable } from "@/components/OfferComparisonTable";
 import { WarningBox } from "@/components/WarningBox";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
-import { CompareForm } from "@/components/CompareForm";
 import type { CompareResult } from "@/types/comparison";
 import type { Restaurant } from "@/types/restaurant";
 import { formatINR } from "@/lib/money";
 
 type ApiResult = CompareResult & { restaurant: Restaurant };
+type InitialParams = {
+  restaurant_id?: string;
+  bill_amount?: string;
+  date?: string;
+  time?: string;
+  people_count?: string;
+};
 
-export function ComparePageClient() {
-  const params = useSearchParams();
+export function ComparePageClient({ initialParams }: { initialParams: InitialParams }) {
   const [data, setData] = useState<ApiResult | null>(null);
   const [error, setError] = useState("");
-  const restaurantId = params.get("restaurant_id") || "";
+  const restaurantId = initialParams.restaurant_id || "";
 
   useEffect(() => {
     setData(null);
@@ -26,28 +30,16 @@ export function ComparePageClient() {
     if (!restaurantId) return;
     const payload = {
       restaurant_id: restaurantId,
-      bill_amount: Number(params.get("bill_amount") || 3000),
-      date: params.get("date") || new Date().toISOString().slice(0, 10),
-      time: params.get("time") || "20:30",
-      people_count: Number(params.get("people_count") || 2)
+      bill_amount: Number(initialParams.bill_amount || 3000),
+      date: initialParams.date || new Date().toISOString().slice(0, 10),
+      time: initialParams.time || "20:30",
+      people_count: Number(initialParams.people_count || 2)
     };
     fetch("/api/compare", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
       .then((res) => res.ok ? res.json() : Promise.reject(new Error("Could not compare offers")))
       .then(setData)
       .catch((err) => setError(err.message));
-  }, [params, restaurantId]);
-
-  if (!restaurantId) {
-    return (
-      <main className="mx-auto max-w-7xl space-y-5 px-4 py-8">
-        <section>
-          <h1 className="text-3xl font-semibold">Compare Restaurant Deals</h1>
-          <p className="mt-2 text-ink/65">Select a Mumbai restaurant, bill amount, date, time and people count to calculate estimated savings.</p>
-        </section>
-        <CompareForm />
-      </main>
-    );
-  }
+  }, [initialParams.bill_amount, initialParams.date, initialParams.people_count, initialParams.time, restaurantId]);
 
   if (error) return <main className="mx-auto max-w-7xl px-4 py-8"><ErrorState message={error} /></main>;
   if (!data) return <main className="mx-auto max-w-7xl px-4 py-8"><LoadingState label="Calculating actual savings" /></main>;
