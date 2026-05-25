@@ -2,10 +2,11 @@ import Link from "next/link";
 import { ArrowRight, MapPin, RefreshCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { CompareForm } from "@/components/CompareForm";
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { restaurants, mumbaiAreas } from "@/data/sample-restaurants";
+import { mumbaiAreas } from "@/data/sample-restaurants";
+import { getRestaurants } from "@/lib/data";
 
-export default function HomePage() {
-  const featured = restaurants.slice(0, 8);
+export default async function HomePage() {
+  const featured = await getRestaurants({ limit: 8 });
   const cards = [
     "Best deals today",
     "Popular restaurants",

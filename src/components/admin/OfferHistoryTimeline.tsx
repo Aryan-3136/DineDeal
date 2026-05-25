@@ -1,9 +1,9 @@
-import { offerHistory } from "@/lib/data";
+import type { OfferHistory } from "@/types/offer";
 
-export function OfferHistoryTimeline() {
+export function OfferHistoryTimeline({ history }: { history: OfferHistory[] }) {
   return (
     <div className="space-y-3">
-      {offerHistory.map((item) => (
+      {history.map((item) => (
         <div key={item.id} className="rounded-lg border border-ink/10 bg-white p-4">
           <div className="text-sm font-semibold">{item.change_reason}</div>
           <div className="mt-1 text-sm text-ink/65">{item.old_offer_text} → {item.new_offer_text}</div>

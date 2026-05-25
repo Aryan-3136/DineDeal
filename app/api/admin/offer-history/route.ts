@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { offerHistory } from "@/lib/data";
+import { getOfferHistory } from "@/lib/data";
 
 export async function GET() {
-  return NextResponse.json({ history: offerHistory });
+  return NextResponse.json({ history: await getOfferHistory() });
 }

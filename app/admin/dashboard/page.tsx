@@ -2,8 +2,8 @@ import Link from "next/link";
 import { AlertTriangle, BadgePercent, History, Store } from "lucide-react";
 import { getStats } from "@/lib/data";
 
-export default function AdminDashboardPage() {
-  const stats = getStats();
+export default async function AdminDashboardPage() {
+  const stats = await getStats();
   const items = [
     ["Total restaurants", stats.totalRestaurants, Store],
     ["Total active offers", stats.activeOffers, BadgePercent],
@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div><h1 className="text-3xl font-semibold">Admin Dashboard</h1><p className="mt-1 text-sm text-ink/65">Supabase Auth should protect this route in deployment middleware; demo mode keeps it open for review.</p></div>
+        <div><h1 className="text-3xl font-semibold">Admin Dashboard</h1><p className="mt-1 text-sm text-ink/65">Admin routes are protected by Supabase Auth when Supabase is configured.</p></div>
         <div className="flex gap-2"><Link className="rounded-lg bg-leaf px-4 py-2 text-sm font-semibold text-white" href="/admin/restaurants/new">Add restaurant</Link><Link className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white" href="/admin/offers/new">Add offer</Link></div>
       </div>
       <div className="mt-6 grid gap-4 md:grid-cols-3">

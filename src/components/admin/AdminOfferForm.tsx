@@ -6,9 +6,9 @@ import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import type { Offer } from "@/types/offer";
-import { platforms, restaurants } from "@/lib/data";
+import type { Platform, Restaurant } from "@/types/restaurant";
 
-export function AdminOfferForm({ offer }: { offer?: Offer }) {
+export function AdminOfferForm({ offer, restaurants, platforms }: { offer?: Offer; restaurants: Restaurant[]; platforms: Platform[] }) {
   const [message, setMessage] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {

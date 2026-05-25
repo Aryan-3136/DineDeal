@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { restaurants } from "@/lib/data";
+import { getRestaurants } from "@/lib/data";
 
-export default function AdminRestaurantsPage() {
+export default async function AdminRestaurantsPage() {
+  const restaurants = await getRestaurants({ limit: 500 });
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="flex justify-between"><h1 className="text-3xl font-semibold">Restaurants</h1><Link className="rounded-lg bg-leaf px-4 py-2 text-sm font-semibold text-white" href="/admin/restaurants/new">Add restaurant</Link></div>

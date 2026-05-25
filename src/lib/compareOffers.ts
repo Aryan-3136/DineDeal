@@ -1,5 +1,5 @@
-import type { Offer } from "@/types/offer";
-import type { CompareResult, ComparedOffer } from "@/types/comparison";
+import type { Offer } from "../types/offer";
+import type { CompareResult, ComparedOffer } from "../types/comparison";
 import { detectMealType, getDayInfo, isOlderThanHours, timeToMinutes } from "./dateTime";
 
 const DISCLAIMER = "Offers may change anytime. Please verify on the platform before booking or payment.";

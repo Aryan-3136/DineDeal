@@ -1,7 +1,8 @@
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { restaurants } from "@/lib/data";
+import { getRestaurants } from "@/lib/data";
 
-export default function MumbaiDealsPage() {
+export default async function MumbaiDealsPage() {
+  const restaurants = await getRestaurants({ limit: 100 });
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="text-3xl font-semibold">Best Restaurant Deals in Mumbai</h1>

@@ -11,12 +11,11 @@ import { compareOffers } from "@/lib/compareOffers";
 import { getLinksForRestaurant, getOffersForRestaurant, getRestaurantBySlug } from "@/lib/data";
 import { formatINR } from "@/lib/money";
 
-export default function RestaurantPage({ params }: { params: { slug: string } }) {
-  const restaurant = getRestaurantBySlug(params.slug);
+export default async function RestaurantPage({ params }: { params: { slug: string } }) {
+  const restaurant = await getRestaurantBySlug(params.slug);
   if (!restaurant) notFound();
   const currentRestaurant = restaurant!;
-  const offers = getOffersForRestaurant(currentRestaurant.id);
-  const links = getLinksForRestaurant(currentRestaurant.id);
+  const [offers, links] = await Promise.all([getOffersForRestaurant(currentRestaurant.id), getLinksForRestaurant(currentRestaurant.id)]);
   const today = new Date().toISOString().slice(0, 10);
   const preset = [1500, 3000, 5000].map((bill) => ({ bill, result: compareOffers(offers, bill, today, "20:30", 2) }));
   const latest = offers.map((offer) => offer.last_checked_at).filter(Boolean).sort().at(-1) || null;

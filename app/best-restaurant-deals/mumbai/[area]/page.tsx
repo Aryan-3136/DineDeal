@@ -1,17 +1,17 @@
 import { notFound } from "next/navigation";
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { offers, restaurants } from "@/lib/data";
+import { getAllOffers, getRestaurants } from "@/lib/data";
 
 function label(area: string) {
   return area.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
 }
 
-export default function AreaDealsPage({ params }: { params: { area: string } }) {
+export default async function AreaDealsPage({ params }: { params: { area: string } }) {
   const areaLabel = label(params.area);
-  const areaRestaurants = restaurants.filter((restaurant) => restaurant.area.toLowerCase() === areaLabel.toLowerCase());
+  const areaRestaurants = await getRestaurants({ area: areaLabel, limit: 100 });
   if (!areaRestaurants.length) notFound();
   const ids = new Set(areaRestaurants.map((restaurant) => restaurant.id));
-  const areaOffers = offers.filter((offer) => ids.has(offer.restaurant_id));
+  const areaOffers = (await getAllOffers()).filter((offer) => ids.has(offer.restaurant_id));
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">

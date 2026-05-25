@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { offers } from "@/lib/data";
+import { getAllOffers } from "@/lib/data";
 import { VerificationStatusBadge } from "@/components/VerificationStatusBadge";
 
-export default function AdminOffersPage() {
+export default async function AdminOffersPage() {
+  const offers = await getAllOffers(true);
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="flex justify-between"><h1 className="text-3xl font-semibold">Offers</h1><Link className="rounded-lg bg-leaf px-4 py-2 text-sm font-semibold text-white" href="/admin/offers/new">Add offer</Link></div>

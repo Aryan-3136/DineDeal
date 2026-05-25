@@ -17,6 +17,20 @@ insert into restaurants (name, slug, area, address, cuisine, approx_cost_for_two
   ('Masala Library','masala-library-bkc','BKC','BKC, Mumbai',array['Modern Indian'],5200,4.5,'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=80','https://www.google.com/maps/search/?api=1&query=Masala%20Library%20BKC%20Mumbai')
 on conflict (slug) do nothing;
 
+insert into restaurants (name, slug, area, address, cuisine, approx_cost_for_two, rating, image_url, google_maps_url)
+select
+  'Seed Mumbai Restaurant ' || gs,
+  'seed-mumbai-restaurant-' || gs,
+  (array['Bandra','Powai','Andheri','BKC','Lower Parel','Juhu','Colaba','Churchgate','Worli','Dadar','Ghatkopar','Thane','Vashi','Malad','Borivali','Kurla','Fort','Marine Lines','Santacruz','Khar','Chembur','Mulund','Navi Mumbai'])[1 + ((gs - 1) % 23)],
+  (array['Bandra','Powai','Andheri','BKC','Lower Parel','Juhu','Colaba','Churchgate','Worli','Dadar','Ghatkopar','Thane','Vashi','Malad','Borivali','Kurla','Fort','Marine Lines','Santacruz','Khar','Chembur','Mulund','Navi Mumbai'])[1 + ((gs - 1) % 23)] || ', Mumbai',
+  array['North Indian','Continental'],
+  1500 + ((gs % 10) * 300),
+  3.8 + ((gs % 8)::numeric / 10),
+  'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80',
+  'https://www.google.com/maps/search/?api=1&query=' || replace('Seed Mumbai Restaurant ' || gs || ' Mumbai', ' ', '%20')
+from generate_series(1, 95) gs
+on conflict (slug) do nothing;
+
 insert into offers (
   restaurant_id, platform_id, offer_text, discount_type, discount_percent, minimum_bill, maximum_discount_cap,
   cashback_or_instant, membership_required, payment_required, valid_days, valid_start_time, valid_end_time,
