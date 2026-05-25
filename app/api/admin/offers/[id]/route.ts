@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminRequest } from "@/lib/adminAuth";
 import { createSupabaseAdminClient } from "@/lib/supabaseClient";
+import { offerFormSchema } from "@/lib/validations";
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const unauthorized = requireAdminRequest(request);
+  const unauthorized = await requireAdminRequest(request);
   if (unauthorized) return unauthorized;
-  const body = await request.json();
+  const parsed = offerFormSchema.partial().safeParse(await request.json());
+  if (!parsed.success) return NextResponse.json({ error: "Invalid offer", details: parsed.error.flatten() }, { status: 400 });
+  const body = parsed.data;
   const supabase = createSupabaseAdminClient();
   if (supabase) {
     const { data: oldOffer, error: oldError } = await supabase.from("offers").select("*").eq("id", params.id).maybeSingle();
@@ -37,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  const unauthorized = requireAdminRequest(_request);
+  const unauthorized = await requireAdminRequest(_request);
   if (unauthorized) return unauthorized;
   const supabase = createSupabaseAdminClient();
   if (supabase) {

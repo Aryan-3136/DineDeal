@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminRequest } from "@/lib/adminAuth";
 import { createSupabaseAdminClient } from "@/lib/supabaseClient";
+import { restaurantFormSchema } from "@/lib/validations";
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const unauthorized = requireAdminRequest(request);
+  const unauthorized = await requireAdminRequest(request);
   if (unauthorized) return unauthorized;
-  const body = await request.json();
+  const parsed = restaurantFormSchema.partial().safeParse(await request.json());
+  if (!parsed.success) return NextResponse.json({ error: "Invalid restaurant", details: parsed.error.flatten() }, { status: 400 });
+  const body = parsed.data;
   const supabase = createSupabaseAdminClient();
   if (supabase) {
     const { data, error } = await supabase.from("restaurants").update(body).eq("id", params.id).select().single();
@@ -16,7 +19,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  const unauthorized = requireAdminRequest(_request);
+  const unauthorized = await requireAdminRequest(_request);
   if (unauthorized) return unauthorized;
   const supabase = createSupabaseAdminClient();
   if (supabase) {

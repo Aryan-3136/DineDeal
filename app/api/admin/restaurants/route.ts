@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminRequest } from "@/lib/adminAuth";
 import { createSupabaseAdminClient } from "@/lib/supabaseClient";
+import { restaurantFormSchema } from "@/lib/validations";
 
 export async function POST(request: NextRequest) {
-  const unauthorized = requireAdminRequest(request);
+  const unauthorized = await requireAdminRequest(request);
   if (unauthorized) return unauthorized;
-  const body = await request.json();
+  const parsed = restaurantFormSchema.safeParse(await request.json());
+  if (!parsed.success) return NextResponse.json({ error: "Invalid restaurant", details: parsed.error.flatten() }, { status: 400 });
+  const body = parsed.data;
   const supabase = createSupabaseAdminClient();
   if (supabase) {
     const { data, error } = await supabase.from("restaurants").insert(body).select().single();

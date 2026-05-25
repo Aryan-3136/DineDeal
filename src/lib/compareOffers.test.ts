@@ -84,4 +84,60 @@ describe("compareOffers", () => {
 
     expect(result.invalid_offers[0].invalid_reasons).toContain("Dinner-only offer");
   });
+
+  it("calculates flat discounts as instant savings", () => {
+    const result = compareOffers([
+      makeOffer("flat", {
+        source_platform: "Restaurant Direct",
+        discount_type: "flat",
+        discount_percent: null,
+        flat_discount: 750,
+        minimum_bill: 2000
+      })
+    ], 3000, "2026-06-15", "20:30", 2);
+
+    expect(result.best_instant_deal?.instant_saving).toBe(750);
+    expect(result.best_instant_deal?.final_payable).toBe(2250);
+  });
+
+  it("marks weekday-only offers invalid on Saturday", () => {
+    const result = compareOffers([
+      makeOffer("weekday", { valid_days: ["monday", "tuesday", "wednesday", "thursday", "friday"] })
+    ], 3000, "2026-06-20", "20:30", 2);
+
+    expect(result.invalid_offers[0].invalid_reasons).toContain("Not valid on selected day");
+  });
+
+  it("marks expired offers invalid", () => {
+    const result = compareOffers([
+      makeOffer("expired", { valid_until: "2026-01-31", verification_status: "expired" })
+    ], 3000, "2026-06-15", "20:30", 2);
+
+    expect(result.invalid_offers[0].status).toBe("expired");
+    expect(result.invalid_offers[0].invalid_reasons).toContain("Expired");
+  });
+
+  it("adds membership warnings", () => {
+    const result = compareOffers([
+      makeOffer("member", { membership_required: true, membership_text: "Requires Gold membership" })
+    ], 3000, "2026-06-15", "20:30", 2);
+
+    expect(result.all_offers_ranked[0].warnings).toContain("Requires Gold membership");
+  });
+
+  it("adds payment warnings", () => {
+    const result = compareOffers([
+      makeOffer("payment", { payment_required: true, payment_text: "Requires HDFC card" })
+    ], 3000, "2026-06-15", "20:30", 2);
+
+    expect(result.all_offers_ranked[0].warnings).toContain("Requires HDFC card");
+  });
+
+  it("adds stale offer warnings", () => {
+    const result = compareOffers([
+      makeOffer("stale", { last_checked_at: "2026-01-01T00:00:00.000Z" })
+    ], 3000, "2026-06-15", "20:30", 2);
+
+    expect(result.all_offers_ranked[0].warnings).toContain("Offer not verified recently");
+  });
 });
