@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { getAllOffers, getRestaurants } from "@/lib/data";
+import { DemoDataBadge } from "@/components/DemoDataBadge";
 
 function label(area: string) {
   return area.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
@@ -17,6 +18,7 @@ export default async function AreaDealsPage({ params }: { params: { area: string
     <main className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="text-3xl font-semibold">Best Restaurant Deals in {areaLabel}, Mumbai</h1>
       <p className="mt-2 text-ink/65">Best deals today, top restaurants, highest estimated savings and recently updated offers for {areaLabel}.</p>
+      <div className="mt-4"><DemoDataBadge /></div>
       <div className="mt-5 grid gap-4 md:grid-cols-3">
         <div className="rounded-lg bg-white p-4 shadow-sm"><div className="text-sm text-ink/60">Restaurants</div><div className="text-2xl font-semibold">{areaRestaurants.length}</div></div>
         <div className="rounded-lg bg-white p-4 shadow-sm"><div className="text-sm text-ink/60">Active demo offers</div><div className="text-2xl font-semibold">{areaOffers.length}</div></div>

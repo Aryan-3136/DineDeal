@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { AlertTriangle, BadgePercent, History, Store } from "lucide-react";
 import { getStats } from "@/lib/data";
+import { AccessDenied } from "@/components/admin/AccessDenied";
+import { requireAdminPage } from "@/lib/adminPageAuth";
 
 export default async function AdminDashboardPage() {
+  const auth = await requireAdminPage();
+  if (auth.denied) return <AccessDenied />;
   const stats = await getStats();
   const items = [
     ["Total restaurants", stats.totalRestaurants, Store],

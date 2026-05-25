@@ -16,11 +16,7 @@ function readAccessToken(request: NextRequest) {
   return null;
 }
 
-export async function getAdminUser(request: NextRequest) {
-  if (!hasSupabaseEnv()) return true;
-  const token = readAccessToken(request);
-  if (!token) return null;
-
+export async function verifyAdminAccessToken(token: string) {
   const authClient = createSupabaseBrowserClient();
   const adminClient = createSupabaseAdminClient();
   if (!authClient || !adminClient) return null;
@@ -51,6 +47,13 @@ export async function getAdminUser(request: NextRequest) {
   if (!adminUser) return false;
   if (!allowedRoles.includes(adminUser.role)) return false;
   return adminUser;
+}
+
+export async function getAdminUser(request: NextRequest) {
+  if (!hasSupabaseEnv()) return true;
+  const token = readAccessToken(request);
+  if (!token) return null;
+  return verifyAdminAccessToken(token);
 }
 
 export async function requireAdminRequest(request: NextRequest) {

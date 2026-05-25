@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { getRestaurants } from "@/lib/data";
+import { AccessDenied } from "@/components/admin/AccessDenied";
+import { requireAdminPage } from "@/lib/adminPageAuth";
 
 export default async function AdminRestaurantsPage() {
+  const auth = await requireAdminPage();
+  if (auth.denied) return <AccessDenied />;
   const restaurants = await getRestaurants({ limit: 500 });
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">

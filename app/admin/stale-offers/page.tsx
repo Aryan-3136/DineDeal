@@ -1,7 +1,11 @@
 import { getAllOffers } from "@/lib/data";
 import { formatDateTime } from "@/lib/dateTime";
+import { AccessDenied } from "@/components/admin/AccessDenied";
+import { requireAdminPage } from "@/lib/adminPageAuth";
 
 export default async function StaleOffersPage() {
+  const auth = await requireAdminPage();
+  if (auth.denied) return <AccessDenied />;
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
   const offers = await getAllOffers();
   const stale = offers.filter((offer) => !offer.last_checked_at || new Date(offer.last_checked_at).getTime() < cutoff);

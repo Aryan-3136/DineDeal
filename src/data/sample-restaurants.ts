@@ -66,7 +66,14 @@ const generatedRestaurantRows = Array.from({ length: 65 }, (_, index) => {
     ["Seafood", "Maharashtrian"],
     ["Modern Indian", "Regional"]
   ][index % 6];
-  const name = `${["Copper", "Saffron", "Harbour", "Curry", "Table", "Bistro", "Tandoor", "Social"][index % 8]} ${area} ${index + 1}`;
+  const names = [
+    "Aamchi Rasoi", "Bombay Bistro", "Coastal Curry House", "The Tiffin Room", "Bayleaf Kitchen",
+    "Junoon Table", "The Spice Foundry", "Kokum & Co", "Monsoon Grill", "Sea Salt Social",
+    "Pali Naka Kitchen", "Urban Tandoor", "Curry Culture", "The Pantry Lane", "Masala Works",
+    "Harbour Spice", "Kebab & Kurry", "Nawab's Table", "Bandra Bowl House", "Powai Plate",
+    "Andheri Adda", "Juhu Junction", "Fort Local", "Worli Wok", "Thane Tandoor"
+  ];
+  const name = `${names[index % names.length]} ${area}`;
   return [
     `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
     name,

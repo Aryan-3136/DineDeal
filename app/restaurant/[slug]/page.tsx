@@ -10,6 +10,7 @@ import { VerificationStatusBadge } from "@/components/VerificationStatusBadge";
 import { compareOffers } from "@/lib/compareOffers";
 import { getLinksForRestaurant, getOffersForRestaurant, getRestaurantBySlug } from "@/lib/data";
 import { formatINR } from "@/lib/money";
+import { DemoDataBadge } from "@/components/DemoDataBadge";
 
 export default async function RestaurantPage({ params }: { params: { slug: string } }) {
   const restaurant = await getRestaurantBySlug(params.slug);
@@ -40,6 +41,7 @@ export default async function RestaurantPage({ params }: { params: { slug: strin
           {currentRestaurant.google_maps_url ? <a className="inline-flex items-center gap-1 text-sm font-semibold text-leaf" href={currentRestaurant.google_maps_url} target="_blank" rel="noreferrer">Open Google Maps <ExternalLink size={14} /></a> : null}
         </div>
       </section>
+      <div className="mt-5"><DemoDataBadge /></div>
 
       <section className="mt-8">
         <h2 className="mb-3 text-xl font-semibold">Compare for my bill</h2>

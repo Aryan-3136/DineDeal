@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { getAllOffers } from "@/lib/data";
 import { VerificationStatusBadge } from "@/components/VerificationStatusBadge";
+import { AccessDenied } from "@/components/admin/AccessDenied";
+import { requireAdminPage } from "@/lib/adminPageAuth";
 
 export default async function AdminOffersPage() {
+  const auth = await requireAdminPage();
+  if (auth.denied) return <AccessDenied />;
   const offers = await getAllOffers(true);
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">

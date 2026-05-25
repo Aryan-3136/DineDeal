@@ -4,6 +4,7 @@ import { CompareForm } from "@/components/CompareForm";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { mumbaiAreas } from "@/data/sample-restaurants";
 import { getRestaurants } from "@/lib/data";
+import { DemoDataBadge } from "@/components/DemoDataBadge";
 
 export default async function HomePage() {
   const featured = await getRestaurants({ limit: 8 });
@@ -26,6 +27,7 @@ export default async function HomePage() {
           <p className="mt-5 max-w-2xl text-lg text-ink/70">Compare EazyDiner, Swiggy Dineout, District and restaurant offers in one place.</p>
         </div>
         <div className="mt-8"><CompareForm /></div>
+        <div className="mt-4"><DemoDataBadge /></div>
       </section>
 
       <section className="bg-white/70 py-8">
