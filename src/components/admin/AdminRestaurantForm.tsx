@@ -5,6 +5,7 @@ import { Save } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import type { Restaurant } from "@/types/restaurant";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 
 export function AdminRestaurantForm({ restaurant }: { restaurant?: Restaurant }) {
   const [message, setMessage] = useState("");
@@ -24,9 +25,13 @@ export function AdminRestaurantForm({ restaurant }: { restaurant?: Restaurant })
       google_maps_url: form.get("google_maps_url"),
       active: form.get("active") === "on"
     };
+    const supabase = createSupabaseBrowserClient();
+    const { data } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (data.session?.access_token) headers.Authorization = `Bearer ${data.session.access_token}`;
     const res = await fetch(restaurant ? `/api/admin/restaurants/${restaurant.id}` : "/api/admin/restaurants", {
       method: restaurant ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(payload)
     });
     setMessage(res.ok ? "Restaurant saved. Supabase writes are used when env keys are configured; otherwise this demo returns a validated response." : "Could not save restaurant.");

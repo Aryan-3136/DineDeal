@@ -10,44 +10,9 @@ type VerifiedAdminUser = {
   role: AdminRole;
 };
 
-function decodeBase64Url(value: string) {
-  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
-  return Buffer.from(normalized, "base64").toString("utf8");
-}
-
-function tokenFromCookieValue(value: string) {
-  if (!value) return null;
-  if (value.startsWith("base64-")) {
-    try {
-      const decoded = JSON.parse(decodeBase64Url(value.slice(7)));
-      return decoded?.access_token || decoded?.[0] || null;
-    } catch {
-      return null;
-    }
-  }
-  try {
-    const decoded = JSON.parse(decodeURIComponent(value));
-    return decoded?.access_token || decoded?.[0] || null;
-  } catch {
-    return value.length > 40 ? value : null;
-  }
-}
-
 function readAccessToken(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) return authHeader.slice("Bearer ".length).trim();
-
-  const directCookie = request.cookies.get("sb-access-token")?.value;
-  const directToken = directCookie ? tokenFromCookieValue(directCookie) : null;
-  if (directToken) return directToken;
-
-  for (const cookie of request.cookies.getAll()) {
-    if (cookie.name.startsWith("sb-") && cookie.name.endsWith("auth-token")) {
-      const token = tokenFromCookieValue(cookie.value);
-      if (token) return token;
-    }
-  }
-
   return null;
 }
 

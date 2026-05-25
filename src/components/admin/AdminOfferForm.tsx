@@ -7,6 +7,7 @@ import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import type { Offer } from "@/types/offer";
 import type { Platform, Restaurant } from "@/types/restaurant";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 
 export function AdminOfferForm({ offer, restaurants, platforms }: { offer?: Offer; restaurants: Restaurant[]; platforms: Platform[] }) {
   const [message, setMessage] = useState("");
@@ -15,9 +16,13 @@ export function AdminOfferForm({ offer, restaurants, platforms }: { offer?: Offe
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const payload = Object.fromEntries(form.entries());
+    const supabase = createSupabaseBrowserClient();
+    const { data } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (data.session?.access_token) headers.Authorization = `Bearer ${data.session.access_token}`;
     const res = await fetch(offer ? `/api/admin/offers/${offer.id}` : "/api/admin/offers", {
       method: offer ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         ...payload,
         discount_percent: Number(payload.discount_percent || 0),
