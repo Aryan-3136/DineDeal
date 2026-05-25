@@ -1,0 +1,64 @@
+export type DiscountType = "percentage" | "flat" | "cashback" | "bogo" | "custom";
+export type CashbackOrInstant = "instant" | "cashback" | "both" | "unknown";
+export type VerificationStatus = "verified" | "needs_review" | "expired" | "uncertain";
+export type MealType = "lunch" | "dinner" | "all_day" | "unknown";
+
+export type Offer = {
+  id: string;
+  restaurant_id: string;
+  platform_id: string;
+  offer_text: string;
+  discount_type: DiscountType;
+  discount_percent?: number | null;
+  flat_discount?: number | null;
+  minimum_bill?: number | null;
+  maximum_discount_cap?: number | null;
+  cashback_value?: number | null;
+  cashback_or_instant: CashbackOrInstant;
+  membership_required: boolean;
+  membership_text?: string | null;
+  payment_required: boolean;
+  payment_text?: string | null;
+  valid_days?: string[] | null;
+  valid_start_time?: string | null;
+  valid_end_time?: string | null;
+  valid_from?: string | null;
+  valid_until?: string | null;
+  meal_type: MealType;
+  alcohol_included?: boolean | null;
+  service_charge_included?: boolean | null;
+  booking_required: boolean;
+  terms_text?: string | null;
+  offer_url?: string | null;
+  source_url?: string | null;
+  source_platform?: string | null;
+  verification_status: VerificationStatus;
+  confidence_score?: number | null;
+  active: boolean;
+  last_checked_at?: string | null;
+  last_changed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  platform?: {
+    id: string;
+    name: string;
+    slug: string;
+    logo_url?: string | null;
+    base_url?: string | null;
+  };
+};
+
+export type OfferHistory = {
+  id: string;
+  offer_id: string;
+  old_offer_text?: string | null;
+  new_offer_text?: string | null;
+  old_discount_percent?: number | null;
+  new_discount_percent?: number | null;
+  old_cap?: number | null;
+  new_cap?: number | null;
+  old_minimum_bill?: number | null;
+  new_minimum_bill?: number | null;
+  change_reason?: string | null;
+  changed_at: string;
+};
