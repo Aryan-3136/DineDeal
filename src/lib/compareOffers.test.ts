@@ -85,6 +85,14 @@ describe("compareOffers", () => {
     expect(result.invalid_offers[0].invalid_reasons).toContain("Dinner-only offer");
   });
 
+  it("rejects lunch-only offers for dinner searches", () => {
+    const result = compareOffers([
+      makeOffer("lunch", { meal_type: "lunch", valid_start_time: "11:00", valid_end_time: "16:00" })
+    ], 3000, "2026-06-15", "20:30", 2);
+
+    expect(result.invalid_offers[0].invalid_reasons).toContain("Lunch-only offer");
+  });
+
   it("calculates flat discounts as instant savings", () => {
     const result = compareOffers([
       makeOffer("flat", {
