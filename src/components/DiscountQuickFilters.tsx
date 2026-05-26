@@ -68,19 +68,18 @@ export function DiscountQuickFilters() {
         <h2 className="text-2xl font-semibold">Quick Discount Filters</h2>
         <p className="mt-1 text-sm text-ink/65">Find restaurants by offer type using current offer data and estimated savings on a Rs 3000 bill.</p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="flex flex-wrap gap-2">
         {filters.map((filter) => (
           <button
             key={`${filter.type}-${filter.min ?? filter.label}`}
             type="button"
             onClick={() => void load(filter)}
-            className={`rounded-lg border p-4 text-left shadow-sm transition hover:-translate-y-0.5 ${active.label === filter.label ? "border-leaf bg-leaf/10" : "border-ink/10 bg-white"}`}
+            className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 md:px-4 ${active.label === filter.label ? "border-leaf bg-leaf/10 text-leaf" : "border-ink/10 bg-white text-ink/75"}`}
           >
-            <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-cream text-leaf">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cream text-leaf">
               {filter.type === "bank" ? <Landmark size={18} /> : filter.type === "cashback" ? <WalletCards size={18} /> : <BadgePercent size={18} />}
-            </div>
-            <div className="font-semibold">{filter.label}</div>
-            <div className="mt-1 text-xs text-ink/55">Show matching restaurants</div>
+            </span>
+            <span>{filter.label}</span>
           </button>
         ))}
       </div>
