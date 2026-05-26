@@ -11,6 +11,7 @@ export type Platform = {
 export type Restaurant = {
   id: string;
   name: string;
+  canonical_name?: string | null;
   slug: string;
   city: string;
   area: string;
@@ -23,6 +24,14 @@ export type Restaurant = {
   active: boolean;
   created_at?: string;
   updated_at?: string;
+};
+
+export type RestaurantAlias = {
+  id: string;
+  restaurant_id: string;
+  alias_name: string;
+  source_platform?: string | null;
+  created_at?: string;
 };
 
 export type RestaurantPlatformLink = {

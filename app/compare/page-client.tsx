@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/Button";
 import type { CompareResult } from "@/types/comparison";
 import type { Restaurant } from "@/types/restaurant";
 import { formatINR } from "@/lib/money";
+import { normalizeSearchText } from "@/lib/search";
 
 type ApiResult = CompareResult & { restaurant: Restaurant };
 type InitialParams = {
@@ -33,6 +34,8 @@ function today() {
 export function ComparePageClient({ initialParams }: { initialParams: InitialParams }) {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [restaurantId, setRestaurantId] = useState(initialParams.restaurant_id || "");
+  const [restaurantQuery, setRestaurantQuery] = useState("");
+  const [restaurantResults, setRestaurantResults] = useState<Restaurant[]>([]);
   const [billAmount, setBillAmount] = useState(Number(initialParams.bill_amount || 3000));
   const [date, setDate] = useState(initialParams.date || today());
   const [time, setTime] = useState(initialParams.time || "20:30");
@@ -48,7 +51,7 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
     setData(null);
 
     if (!nextRestaurantId) {
-      setValidationError("Please select a restaurant.");
+      setValidationError("Please select a restaurant from the suggestions.");
       return;
     }
 
@@ -84,15 +87,31 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    void runCompare();
+    let nextRestaurantId = restaurantId;
+    if (!nextRestaurantId && restaurantQuery.trim()) {
+      const normalized = normalizeSearchText(restaurantQuery);
+      const exact = restaurantResults.find((item) => {
+        const name = normalizeSearchText(item.name);
+        const nameArea = normalizeSearchText(`${item.name} ${item.area}`);
+        const commaNameArea = normalizeSearchText(`${item.name}, ${item.area}`);
+        return normalized === name || normalized === nameArea || normalized === commaNameArea;
+      });
+      if (exact) {
+        setSelectedRestaurant(exact);
+        setRestaurantId(exact.id);
+        nextRestaurantId = exact.id;
+      }
+    }
+    void runCompare(nextRestaurantId);
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8">
-      <section>
-        <h1 className="text-3xl font-semibold">Compare Restaurant Deals</h1>
-        <p className="mt-2 text-ink/65">Select a restaurant first to compare offers.</p>
-      </section>
+    <section className="mx-auto max-w-7xl space-y-6 px-4 py-10 md:py-14">
+      <div className="max-w-4xl">
+        <div className="mb-4 inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-leaf shadow-sm">BestDiningDeal for Mumbai</div>
+        <h1 className="text-4xl font-semibold leading-tight md:text-6xl">Find the Best Restaurant Deal Before You Dine</h1>
+        <p className="mt-5 max-w-3xl text-lg text-ink/70">Compare EazyDiner, Swiggy Dineout, District and restaurant offers by actual savings, not just discount percentage.</p>
+      </div>
 
       <form onSubmit={submit} className="rounded-lg border border-ink/10 bg-white p-4 shadow-soft md:p-5">
         <div className="grid gap-4 md:grid-cols-[1.7fr_1fr_1.2fr_.7fr_auto] md:items-end">
@@ -112,11 +131,14 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
               </button>
             ) : (
               <RestaurantSearchCombobox
+                selectedRestaurant={selectedRestaurant}
                 onSelect={(restaurant) => {
                   setSelectedRestaurant(restaurant);
-                  setRestaurantId(restaurant.id);
+                  setRestaurantId(restaurant?.id || "");
                   setValidationError("");
                 }}
+                onQueryChange={setRestaurantQuery}
+                onResultsChange={setRestaurantResults}
               />
             )}
             {validationError ? <p className="mt-2 text-sm text-red-700">{validationError}</p> : null}
@@ -127,6 +149,10 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
           <Button type="submit" disabled={loading}><Search size={18} /> {loading ? "Finding..." : "Find Best Deal"}</Button>
         </div>
       </form>
+
+      <p className="rounded-lg bg-amber/10 p-4 text-sm text-ink/70">
+        Estimated savings based on last checked data. Offers may change anytime. Please verify before booking or payment.
+      </p>
 
       {loading ? <LoadingState label="Calculating actual savings" /> : null}
       {error ? <ErrorState message={error} /> : null}
@@ -166,6 +192,6 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
           <p className="text-sm text-ink/60">{data.calculation_explanation}</p>
         </section>
       ) : null}
-    </main>
+    </section>
   );
 }

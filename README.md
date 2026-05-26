@@ -39,9 +39,27 @@ SUPABASE_SERVICE_ROLE_KEY=
 2. Run `supabase/schema.sql`.
 3. Run `supabase/policies.sql`.
 4. Run `supabase/seed.sql` for starter SQL data.
-5. Create an auth user and add a matching row in `admin_users`.
+5. Create the first admin user with the local setup script below.
 
 Admin writes use `SUPABASE_SERVICE_ROLE_KEY` when configured. In demo mode, admin forms validate and return sample responses without persisting.
+
+## How to create first admin user
+
+Create `.env.local` with your Supabase URL and service role key. The service role key is only used by the local script and must never be exposed in frontend code or committed.
+
+```bash
+SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+Then run:
+
+```bash
+npm run create-admin -- --email admin@example.com --password StrongPassword123 --name "Admin User"
+```
+
+The script creates or reuses a Supabase Auth user, confirms the email, and upserts the matching `public.admin_users` row with `role = admin`. It never prints the password or service role key. Do not deploy this as an API route.
 
 ## How To Run
 

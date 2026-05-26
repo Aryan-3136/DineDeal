@@ -9,11 +9,14 @@ import { DateTimeSelector } from "./DateTimeSelector";
 import { PeopleSelector } from "./PeopleSelector";
 import { RestaurantSearchCombobox } from "./RestaurantSearchCombobox";
 import type { Restaurant } from "@/types/restaurant";
+import { normalizeSearchText } from "@/lib/search";
 
 export function CompareForm({ compact = false, restaurant }: { compact?: boolean; restaurant?: Restaurant }) {
   const router = useRouter();
   const today = new Date().toISOString().slice(0, 10);
   const [selected, setSelected] = useState<Restaurant | undefined>(restaurant);
+  const [restaurantQuery, setRestaurantQuery] = useState("");
+  const [restaurantResults, setRestaurantResults] = useState<Restaurant[]>([]);
   const [billAmount, setBillAmount] = useState(3000);
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("20:30");
@@ -22,8 +25,20 @@ export function CompareForm({ compact = false, restaurant }: { compact?: boolean
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!selected) {
-      setError("Select a restaurant from search first.");
+    let restaurantToCompare = selected;
+    if (!restaurantToCompare && restaurantQuery.trim()) {
+      const normalized = normalizeSearchText(restaurantQuery);
+      restaurantToCompare = restaurantResults.find((item) => {
+        const name = normalizeSearchText(item.name);
+        const nameArea = normalizeSearchText(`${item.name} ${item.area}`);
+        const commaNameArea = normalizeSearchText(`${item.name}, ${item.area}`);
+        return normalized === name || normalized === nameArea || normalized === commaNameArea;
+      });
+      if (restaurantToCompare) setSelected(restaurantToCompare);
+    }
+
+    if (!restaurantToCompare) {
+      setError("Please select a restaurant from the suggestions.");
       return;
     }
     if (billAmount <= 0 || people <= 0) {
@@ -31,8 +46,8 @@ export function CompareForm({ compact = false, restaurant }: { compact?: boolean
       return;
     }
     const params = new URLSearchParams({
-      restaurant_id: selected.id,
-      slug: selected.slug,
+      restaurant_id: restaurantToCompare.id,
+      slug: restaurantToCompare.slug,
       bill_amount: String(billAmount),
       date,
       time,
@@ -52,7 +67,15 @@ export function CompareForm({ compact = false, restaurant }: { compact?: boolean
         ) : (
           <div>
             <span className="mb-1 block text-sm font-medium">Restaurant</span>
-            <RestaurantSearchCombobox onSelect={setSelected} />
+            <RestaurantSearchCombobox
+              selectedRestaurant={selected ?? null}
+              onSelect={(value) => {
+                setSelected(value ?? undefined);
+                setError("");
+              }}
+              onQueryChange={setRestaurantQuery}
+              onResultsChange={setRestaurantResults}
+            />
           </div>
         )}
         <BillAmountInput value={billAmount} onChange={setBillAmount} />

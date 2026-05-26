@@ -1,4 +1,4 @@
-import { ComparePageClient } from "./page-client";
+import { CompareLandingPage } from "@/components/CompareLandingPage";
 
 type CompareSearchParams = {
   restaurant_id?: string;
@@ -9,5 +9,5 @@ type CompareSearchParams = {
 };
 
 export default function ComparePage({ searchParams }: { searchParams: CompareSearchParams }) {
-  return <ComparePageClient initialParams={searchParams} />;
+  return <CompareLandingPage initialParams={searchParams} />;
 }

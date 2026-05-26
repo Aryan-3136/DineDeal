@@ -2,7 +2,7 @@ import { restaurants as sampleRestaurants, platforms as samplePlatforms, restaur
 import { offers as sampleOffers, offerHistory as sampleOfferHistory } from "@/data/sample-offers";
 import type { Restaurant } from "@/types/restaurant";
 import type { Offer, OfferHistory } from "@/types/offer";
-import { fuzzySearchRestaurants } from "./search";
+import { normalizeSearchText, scoreRestaurantSearch, searchRestaurantsLocal, type RestaurantSearchResult } from "./search";
 import { createSupabaseAdminClient, createSupabaseBrowserClient } from "./supabaseClient";
 
 function supabase() {
@@ -63,7 +63,7 @@ export async function getRestaurants(filters: RestaurantFilters = {}) {
     }
   }
 
-  let data = filters.q ? fuzzySearchRestaurants(sampleRestaurants, filters.q, 200) : sampleRestaurants.filter((restaurant) => restaurant.active);
+  let data = filters.q ? searchRestaurantsLocal(sampleRestaurants, filters.q, 200) : sampleRestaurants.filter((restaurant) => restaurant.active);
   if (filters.area) data = data.filter((restaurant) => restaurant.area.toLowerCase() === filters.area!.toLowerCase());
   if (filters.cuisine) data = data.filter((restaurant) => restaurant.cuisine.some((item) => item.toLowerCase().includes(filters.cuisine!.toLowerCase())));
   if (filters.platform) data = data.filter((restaurant) => sampleLinks.some((link) => link.restaurant_id === restaurant.id && link.platform?.slug === filters.platform));
@@ -84,13 +84,29 @@ export async function countRestaurants(filters: RestaurantFilters = {}) {
   return (await getRestaurants({ ...filters, limit: 10000 })).length;
 }
 
-export async function searchRestaurants(q: string, limit = 10) {
+export async function searchRestaurants(q: string, limit = 10): Promise<RestaurantSearchResult[]> {
+  const normalized = normalizeSearchText(q);
+  if (!normalized) return [];
   const client = supabase();
-  if (client && q.trim()) {
-    const { data, error } = await client.rpc("search_restaurants", { search_text: q, result_limit: limit });
-    if (!error && data) return data as Restaurant[];
+  if (client) {
+    const { data, error } = await client.rpc("search_restaurants", { search_text: normalized, result_limit: limit });
+    if (!error && data) {
+      return (data as Restaurant[]).map((restaurant) => {
+        const existingScore = "match_score" in restaurant ? Number((restaurant as RestaurantSearchResult).match_score) : null;
+        const existingReason = "match_reason" in restaurant ? String((restaurant as RestaurantSearchResult).match_reason) : "";
+        const scored = scoreRestaurantSearch(restaurant, normalized);
+        return {
+          ...restaurant,
+          match_score: existingScore && existingScore > 0 ? existingScore : Math.round(scored.score * 100) / 100,
+          match_reason: existingReason || scored.reason
+        };
+      }).sort((a, b) => b.match_score - a.match_score).slice(0, limit);
+    }
+
+    const { data: allRestaurants } = await client.from("restaurants").select("*").eq("active", true).limit(500);
+    if (allRestaurants) return searchRestaurantsLocal(allRestaurants as Restaurant[], normalized, limit);
   }
-  return fuzzySearchRestaurants(sampleRestaurants, q, limit);
+  return searchRestaurantsLocal(sampleRestaurants, normalized, limit);
 }
 
 export async function getRestaurantBySlug(slug: string) {

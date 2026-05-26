@@ -21,8 +21,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span>DineDeal Mumbai</span>
             </Link>
             <div className="flex items-center gap-4 text-sm text-ink/70">
-              <Link className="hover:text-ink" href="/best-restaurant-deals/mumbai">Deals</Link>
-              <Link className="hover:text-ink" href="/compare">Compare</Link>
+              <Link className="hover:text-ink" href="/">Compare</Link>
+              <Link className="hover:text-ink" href="/best-restaurant-deals/mumbai">Restaurants</Link>
               <Link className="hover:text-ink" href="/admin/dashboard">Admin</Link>
             </div>
           </nav>

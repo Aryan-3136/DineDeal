@@ -40,6 +40,14 @@ create table if not exists restaurant_platform_links (
   updated_at timestamptz default now()
 );
 
+create table if not exists restaurant_aliases (
+  id uuid primary key default uuid_generate_v4(),
+  restaurant_id uuid references restaurants(id) on delete cascade,
+  alias_name text not null,
+  source_platform text,
+  created_at timestamptz default now()
+);
+
 create table if not exists offers (
   id uuid primary key default uuid_generate_v4(),
   restaurant_id uuid references restaurants(id) on delete cascade,
@@ -121,6 +129,8 @@ create index if not exists restaurants_slug_idx on restaurants(slug);
 create index if not exists restaurants_area_idx on restaurants(area);
 create index if not exists restaurants_cuisine_gin_idx on restaurants using gin(cuisine);
 create index if not exists restaurants_name_trgm_idx on restaurants using gin(name gin_trgm_ops);
+create index if not exists restaurants_area_trgm_idx on restaurants using gin(area gin_trgm_ops);
+create index if not exists restaurant_aliases_alias_trgm_idx on restaurant_aliases using gin(alias_name gin_trgm_ops);
 create index if not exists offers_restaurant_id_idx on offers(restaurant_id);
 create index if not exists offers_platform_id_idx on offers(platform_id);
 create index if not exists offers_active_idx on offers(active);
@@ -128,17 +138,71 @@ create index if not exists offers_verification_status_idx on offers(verification
 create index if not exists offers_last_checked_at_idx on offers(last_checked_at);
 
 create or replace function search_restaurants(search_text text, result_limit int default 10)
-returns setof restaurants
+returns table (
+  id uuid,
+  name text,
+  slug text,
+  city text,
+  area text,
+  address text,
+  cuisine text[],
+  approx_cost_for_two integer,
+  rating numeric,
+  image_url text,
+  google_maps_url text,
+  active boolean,
+  created_at timestamptz,
+  updated_at timestamptz,
+  match_score numeric,
+  match_reason text
+)
 language sql stable as $$
-  select *
-  from restaurants
-  where active = true
-    and (
-      name ilike '%' || search_text || '%'
-      or area ilike '%' || search_text || '%'
-      or cuisine::text ilike '%' || search_text || '%'
-      or similarity(name, search_text) > 0.25
-    )
-  order by greatest(similarity(name, search_text), similarity(area, search_text)) desc, name
+  with normalized as (
+    select lower(regexp_replace(trim(search_text), '[^a-zA-Z0-9 ]', ' ', 'g')) as q
+  ),
+  alias_scores as (
+    select restaurant_id, max(similarity(lower(alias_name), (select q from normalized))) as alias_similarity
+    from restaurant_aliases
+    group by restaurant_id
+  ),
+  scored as (
+    select
+      r.*,
+      case
+        when lower(r.name) = (select q from normalized) then 100
+        when coalesce(a.alias_similarity, 0) > 0.92 then 95
+        when lower(r.name) like (select q from normalized) || '%' then 80
+        when lower(r.name) like '%' || (select q from normalized) || '%' then 60
+        when lower(r.name || ' ' || r.area) like '%' || (select q from normalized) || '%' then 55
+        when lower(r.area) = (select q from normalized) then 45
+        when lower(r.area) like '%' || (select q from normalized) || '%' then 35
+        when lower(array_to_string(r.cuisine, ' ')) like '%' || (select q from normalized) || '%' then 25
+        else greatest(
+          similarity(lower(r.name || ' ' || r.area), (select q from normalized)),
+          similarity(lower(r.name), (select q from normalized)),
+          similarity(lower(r.area), (select q from normalized)),
+          similarity(lower(array_to_string(r.cuisine, ' ')), (select q from normalized)),
+          coalesce(a.alias_similarity, 0)
+        ) * 30
+      end + coalesce(r.rating, 0) * 2 as score,
+      case
+        when lower(r.name) = (select q from normalized) then 'exact name match'
+        when coalesce(a.alias_similarity, 0) > 0.92 then 'alias exact match'
+        when lower(r.name) like (select q from normalized) || '%' then 'name starts with query'
+        when lower(r.name) like '%' || (select q from normalized) || '%' then 'name includes query'
+        when lower(r.name || ' ' || r.area) like '%' || (select q from normalized) || '%' then 'restaurant and area match'
+        when lower(r.area) = (select q from normalized) then 'area exact match'
+        when lower(r.area) like '%' || (select q from normalized) || '%' then 'area match'
+        when lower(array_to_string(r.cuisine, ' ')) like '%' || (select q from normalized) || '%' then 'cuisine match'
+        else 'fuzzy match'
+      end as reason
+    from restaurants r
+    left join alias_scores a on a.restaurant_id = r.id
+    where r.active = true
+  )
+  select id, name, slug, city, area, address, cuisine, approx_cost_for_two, rating, image_url, google_maps_url, active, created_at, updated_at, round(score, 2), reason
+  from scored
+  where score > 8
+  order by score desc, rating desc nulls last, name
   limit result_limit;
 $$;
