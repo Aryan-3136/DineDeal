@@ -13,16 +13,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <header className="sticky top-0 z-40 border-b border-ink/10 bg-linen/92 backdrop-blur">
-          <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+          <nav className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2 md:px-4 md:py-3">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-leaf text-white">
-                <UtensilsCrossed size={20} />
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-leaf text-white md:h-9 md:w-9">
+                <UtensilsCrossed size={18} />
               </span>
-              <span>DineDeal Mumbai</span>
+              <span className="text-sm md:text-base">DineDeal Mumbai</span>
             </Link>
-            <div className="flex items-center gap-4 text-sm text-ink/70">
+            <div className="flex items-center gap-3 text-xs text-ink/70 md:gap-4 md:text-sm">
               <Link className="hover:text-ink" href="/">Compare</Link>
-              <Link className="hover:text-ink" href="/best-restaurant-deals/mumbai">Restaurants</Link>
+              <Link className="hidden hover:text-ink sm:inline" href="/best-restaurant-deals/mumbai">Restaurants</Link>
               <Link className="hover:text-ink" href="/admin/dashboard">Admin</Link>
             </div>
           </nav>

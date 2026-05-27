@@ -15,11 +15,11 @@ export async function SmartDealSections() {
   ]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 px-4 pb-14">
+    <div className="mx-auto max-w-7xl space-y-8 px-3 pb-12 pt-4 md:space-y-10 md:px-4">
       <section>
-        <div className="mb-5 flex items-center gap-2">
-          <BadgePercent className="text-leaf" size={22} />
-          <h2 className="text-2xl font-semibold">Best Instant Savings Today</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <BadgePercent className="text-leaf" size={20} />
+          <h2 className="text-xl font-semibold md:text-2xl">Best Instant Savings Today</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {bestSavings.map((item) => (
@@ -34,9 +34,9 @@ export async function SmartDealSections() {
       </section>
 
       <section>
-        <div className="mb-5 flex items-center gap-2">
-          <MapPin className="text-leaf" size={22} />
-          <h2 className="text-2xl font-semibold">Best Deals by Area</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <MapPin className="text-leaf" size={20} />
+          <h2 className="text-xl font-semibold md:text-2xl">Best Deals by Area</h2>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           {areas.map((area) => (
@@ -49,9 +49,9 @@ export async function SmartDealSections() {
       </section>
 
       <section>
-        <div className="mb-5 flex items-center gap-2">
-          <Store className="text-leaf" size={22} />
-          <h2 className="text-2xl font-semibold">Popular Platforms</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <Store className="text-leaf" size={20} />
+          <h2 className="text-xl font-semibold md:text-2xl">Popular Platforms</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-5">
           {platformCounts.slice(0, 5).map(({ platform, count }) => (
@@ -65,9 +65,9 @@ export async function SmartDealSections() {
       </section>
 
       <section>
-        <div className="mb-5 flex items-center gap-2">
-          <Clock3 className="text-leaf" size={22} />
-          <h2 className="text-2xl font-semibold">Recently Checked Offers</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <Clock3 className="text-leaf" size={20} />
+          <h2 className="text-xl font-semibold md:text-2xl">Recently Checked Offers</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {recentOffers.map(({ offer, restaurant, platform_name }) => (

@@ -22,15 +22,15 @@ type Result = {
 };
 
 const filters: Filter[] = [
-  { label: "10% Off", type: "percent", min: 10 },
-  { label: "15% Off", type: "percent", min: 15 },
-  { label: "20% Off", type: "percent", min: 20 },
-  { label: "25% Off", type: "percent", min: 25 },
-  { label: "30% Off", type: "percent", min: 30 },
-  { label: "40% Off", type: "percent", min: 40 },
-  { label: "50% Off", type: "percent", min: 50 },
+  { label: "10%+", type: "percent", min: 10 },
+  { label: "15%+", type: "percent", min: 15 },
+  { label: "20%+", type: "percent", min: 20 },
+  { label: "25%+", type: "percent", min: 25 },
+  { label: "30%+", type: "percent", min: 30 },
+  { label: "40%+", type: "percent", min: 40 },
+  { label: "50%+", type: "percent", min: 50 },
   { label: "Flat Rs 500+", type: "flat", min: 500 },
-  { label: "Cashback Offers", type: "cashback" },
+  { label: "Cashback", type: "cashback" },
   { label: "Bank Offers", type: "bank" }
 ];
 
@@ -45,9 +45,11 @@ export function DiscountQuickFilters() {
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasClicked, setHasClicked] = useState(false);
 
   async function load(filter: Filter) {
     setActive(filter);
+    setHasClicked(true);
     setLoading(true);
     setError("");
     try {
@@ -63,32 +65,42 @@ export function DiscountQuickFilters() {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
-      <div className="mb-5">
-        <h2 className="text-2xl font-semibold">Quick Discount Filters</h2>
-        <p className="mt-1 text-sm text-ink/65">Find restaurants by offer type using current offer data and estimated savings on a Rs 3000 bill.</p>
+    <section className="mx-auto max-w-7xl px-3 py-3 md:px-4 md:py-8">
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold md:text-2xl">Quick Filters</h2>
+          <p className="hidden text-sm text-ink/65 md:mt-1 md:block">Find restaurants by current offer data and estimated savings on a Rs 3000 bill.</p>
+        </div>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-2 md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
         {filters.map((filter) => (
           <button
             key={`${filter.type}-${filter.min ?? filter.label}`}
             type="button"
             onClick={() => void load(filter)}
-            className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 md:px-4 ${active.label === filter.label ? "border-leaf bg-leaf/10 text-leaf" : "border-ink/10 bg-white text-ink/75"}`}
+            className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 md:min-h-11 md:gap-2 md:px-4 ${active.label === filter.label ? "border-leaf bg-leaf/10 text-leaf" : "border-ink/10 bg-white text-ink/75"}`}
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cream text-leaf">
-              {filter.type === "bank" ? <Landmark size={18} /> : filter.type === "cashback" ? <WalletCards size={18} /> : <BadgePercent size={18} />}
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cream text-leaf md:h-7 md:w-7">
+              {filter.type === "bank" ? <Landmark size={15} /> : filter.type === "cashback" ? <WalletCards size={15} /> : <BadgePercent size={15} />}
             </span>
             <span>{filter.label}</span>
           </button>
         ))}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-3 grid gap-2 text-xs text-ink/65 sm:grid-cols-3 md:mt-5 md:text-sm">
+        {["Search restaurant", "Enter bill", "Compare real savings"].map((step, index) => (
+          <div key={step} className="rounded-lg border border-ink/10 bg-white px-3 py-2 shadow-sm">
+            <span className="mr-2 font-semibold text-leaf">{index + 1}</span>{step}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5">
         {loading ? <div className="rounded-lg border border-ink/10 bg-white p-5 text-sm text-ink/65"><Loader2 className="mr-2 inline animate-spin" size={16} />Loading matching offers...</div> : null}
         {error ? <ErrorState message={error} /> : null}
-        {!loading && !error && !results.length ? (
-          <EmptyState title="Pick a filter to see matching restaurants" body="Results use active offer data and sort by estimated savings, verification, freshness and rating." />
+        {hasClicked && !loading && !error && !results.length ? (
+          <EmptyState title="No matching restaurants found" body="Try a lower discount filter or search for a restaurant directly." />
         ) : null}
         {results.length ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

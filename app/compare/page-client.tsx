@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { BestDealCard } from "@/components/BestDealCard";
 import { OfferComparisonTable } from "@/components/OfferComparisonTable";
@@ -11,7 +11,6 @@ import { RestaurantSearchCombobox } from "@/components/RestaurantSearchCombobox"
 import { BillAmountInput } from "@/components/BillAmountInput";
 import { DateTimeSelector } from "@/components/DateTimeSelector";
 import { PeopleSelector } from "@/components/PeopleSelector";
-import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/Button";
 import type { CompareResult } from "@/types/comparison";
 import type { Restaurant } from "@/types/restaurant";
@@ -44,11 +43,14 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
   const [error, setError] = useState("");
   const [validationError, setValidationError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(Boolean(initialParams.restaurant_id));
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   async function runCompare(nextRestaurantId = restaurantId) {
     setError("");
     setValidationError("");
     setData(null);
+    setHasSubmitted(true);
 
     if (!nextRestaurantId) {
       setValidationError("Please select a restaurant from the suggestions.");
@@ -70,6 +72,7 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
       });
       if (!response.ok) throw new Error("Could not compare offers");
       setData(await response.json());
+      window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not compare offers");
     } finally {
@@ -106,14 +109,15 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
   }
 
   return (
-    <section className="mx-auto max-w-7xl space-y-6 px-4 py-10 md:py-14">
-      <div className="max-w-4xl">
-        <div className="mb-4 inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-leaf shadow-sm">BestDiningDeal for Mumbai</div>
-        <h1 className="text-4xl font-semibold leading-tight md:text-6xl">Find the Best Restaurant Deal Before You Dine</h1>
-        <p className="mt-5 max-w-3xl text-lg text-ink/70">Compare EazyDiner, Swiggy Dineout, District and restaurant offers by actual savings, not just discount percentage.</p>
+    <section className="mx-auto max-w-7xl space-y-3 px-3 pb-3 pt-4 md:grid md:grid-cols-[0.9fr_1.1fr] md:gap-6 md:space-y-0 md:px-4 md:py-8">
+      <div className="md:pt-4">
+        <div className="mb-2 inline-flex rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-leaf shadow-sm md:text-sm">BestDiningDeal for Mumbai</div>
+        <h1 className="max-w-sm text-3xl font-semibold leading-tight md:max-w-xl md:text-5xl">Find the Best Dining Deal</h1>
+        <p className="mt-2 max-w-xl text-sm text-ink/70 md:mt-4 md:text-lg">Compare real savings across EazyDiner, Dineout, District and more.</p>
+        <p className="mt-3 hidden text-sm font-medium text-leaf md:block">Actual savings after caps, timing rules and cashback separation.</p>
       </div>
 
-      <form onSubmit={submit} className="rounded-lg border border-ink/10 bg-white p-4 shadow-soft md:p-5">
+      <form onSubmit={submit} className="rounded-2xl border border-ink/10 bg-white p-3 shadow-soft md:p-5">
         <div className="grid gap-4 md:grid-cols-[1.7fr_1fr_1.2fr_.7fr_auto] md:items-end">
           <div>
             <span className="mb-1 block text-sm font-medium">Restaurant</span>
@@ -146,26 +150,25 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
           <BillAmountInput value={billAmount} onChange={setBillAmount} />
           <DateTimeSelector date={date} time={time} onDate={setDate} onTime={setTime} />
           <PeopleSelector value={people} onChange={setPeople} />
-          <Button type="submit" disabled={loading}><Search size={18} /> {loading ? "Finding..." : "Find Best Deal"}</Button>
+          <Button type="submit" disabled={loading} className="w-full"><Search size={18} /> {loading ? "Comparing..." : "Find Best Deal"}</Button>
         </div>
+        <p className="mt-3 text-xs text-ink/55">Estimated savings only. Verify on the platform before booking.</p>
       </form>
 
-      <p className="rounded-lg bg-amber/10 p-4 text-sm text-ink/70">
-        Estimated savings based on last checked data. Offers may change anytime. Please verify before booking or payment.
-      </p>
-
-      {loading ? <LoadingState label="Calculating actual savings" /> : null}
-      {error ? <ErrorState message={error} /> : null}
-      {!loading && !error && !data ? (
-        <EmptyState title="Select a restaurant first to compare offers" body="Use the search box above, enter your bill details, then find the likely best deal." />
-      ) : null}
+      <div ref={resultsRef} className="md:col-span-2">
+        {loading ? <LoadingState label="Calculating actual savings" /> : null}
+        {error ? <ErrorState message={error} /> : null}
+        {hasSubmitted && !loading && !error && !data ? (
+          <div className="rounded-lg border border-ink/10 bg-white p-4 text-sm text-ink/65">Select a restaurant from the suggestions, then compare deals.</div>
+        ) : null}
+      </div>
 
       {data ? (
-        <section className="space-y-6">
+        <section className="space-y-5 md:col-span-2">
           <div>
             <h2 className="text-2xl font-semibold">Offer comparison for {data.restaurant.name}</h2>
             <p className="mt-2 text-ink/65">
-              {data.restaurant.area} · Bill {formatINR(data.input_summary.bill_amount)} · {data.input_summary.day} · {data.input_summary.time} · {data.input_summary.meal_type} · {data.input_summary.people_count} people
+              {data.restaurant.area} - Bill {formatINR(data.input_summary.bill_amount)} - {data.input_summary.day} - {data.input_summary.time} - {data.input_summary.meal_type} - {data.input_summary.people_count} people
             </p>
           </div>
           <BestDealCard deal={data.best_instant_deal} billAmount={data.input_summary.bill_amount} />
@@ -195,3 +198,4 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
     </section>
   );
 }
+
