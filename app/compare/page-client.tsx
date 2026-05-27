@@ -180,19 +180,7 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
             </div>
           ) : null}
           <WarningBox warnings={data.warnings} />
-          {data.invalid_offers.length ? (
-            <div className="rounded-lg border border-ink/10 bg-white p-4">
-              <h3 className="font-semibold">Invalid Offers</h3>
-              <div className="mt-3 space-y-2 text-sm text-ink/70">
-                {data.invalid_offers.map((item) => (
-                  <div key={item.offer.id} className="rounded-lg bg-cream p-3">
-                    <strong>{item.platform_name}:</strong> {item.invalid_reasons.join(", ") || item.status}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          <OfferComparisonTable offers={data.all_offers_ranked} />
+          <OfferComparisonTable offers={data.all_offers_ranked} invalidOffers={data.invalid_offers} />
           <p className="text-sm text-ink/60">{data.disclaimer}</p>
           <p className="text-sm text-ink/60">{data.calculation_explanation}</p>
         </section>
