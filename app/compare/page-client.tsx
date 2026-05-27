@@ -109,7 +109,7 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
   }
 
   return (
-    <section className="mx-auto max-w-7xl space-y-3 px-3 pb-3 pt-4 md:grid md:grid-cols-[0.9fr_1.1fr] md:gap-6 md:space-y-0 md:px-4 md:py-8">
+    <section className="mx-auto max-w-7xl space-y-3 px-3 pb-3 pt-4 md:grid md:grid-cols-[45fr_55fr] md:gap-8 md:space-y-0 md:px-4 md:py-8">
       <div className="md:pt-4">
         <div className="mb-2 inline-flex rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-leaf shadow-sm md:text-sm">BestDiningDeal for Mumbai</div>
         <h1 className="max-w-sm text-3xl font-semibold leading-tight md:max-w-xl md:text-5xl">Find the Best Dining Deal</h1>
@@ -117,9 +117,9 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
         <p className="mt-3 hidden text-sm font-medium text-leaf md:block">Actual savings after caps, timing rules and cashback separation.</p>
       </div>
 
-      <form onSubmit={submit} className="rounded-2xl border border-ink/10 bg-white p-3 shadow-soft md:p-5">
-        <div className="grid gap-4 md:grid-cols-[1.7fr_1fr_1.2fr_.7fr_auto] md:items-end">
-          <div>
+      <form onSubmit={submit} className="rounded-2xl border border-ink/10 bg-white p-3 shadow-soft md:min-w-[620px] md:p-5">
+        <div className="grid gap-3 md:gap-4">
+          <div className="min-w-0">
             <span className="mb-1 block text-sm font-medium">Restaurant</span>
             {selectedRestaurant ? (
               <button
@@ -147,10 +147,12 @@ export function ComparePageClient({ initialParams }: { initialParams: InitialPar
             )}
             {validationError ? <p className="mt-2 text-sm text-red-700">{validationError}</p> : null}
           </div>
-          <BillAmountInput value={billAmount} onChange={setBillAmount} />
-          <DateTimeSelector date={date} time={time} onDate={setDate} onTime={setTime} />
-          <PeopleSelector value={people} onChange={setPeople} />
-          <Button type="submit" disabled={loading} className="w-full"><Search size={18} /> {loading ? "Comparing..." : "Find Best Deal"}</Button>
+          <div className="grid gap-3 md:grid-cols-[1fr_1.25fr_.75fr]">
+            <BillAmountInput value={billAmount} onChange={setBillAmount} />
+            <DateTimeSelector date={date} time={time} onDate={setDate} onTime={setTime} />
+            <PeopleSelector value={people} onChange={setPeople} />
+          </div>
+          <Button type="submit" disabled={loading} className="w-full md:min-h-12"><Search size={18} /> {loading ? "Comparing..." : "Find Best Deal"}</Button>
         </div>
         <p className="mt-3 text-xs text-ink/55">Estimated savings only. Verify on the platform before booking.</p>
       </form>

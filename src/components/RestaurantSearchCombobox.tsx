@@ -157,20 +157,21 @@ export function RestaurantSearchCombobox({
         ) : null}
       </div>
       {open && query.trim() ? (
-        <div className="absolute z-30 mt-2 max-h-96 w-full overflow-auto rounded-lg border border-ink/10 bg-white shadow-soft">
+        <div className="absolute left-0 right-0 z-50 mt-2 max-h-[360px] min-w-full overflow-y-auto overflow-x-hidden rounded-xl border border-ink/10 bg-white p-1 shadow-soft md:min-w-[420px]">
           {results.length ? results.map((restaurant, index) => {
             const content = (
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="font-medium">{restaurant.name}, {restaurant.area}</div>
-                  <div className="text-sm text-ink/60">
-                    {restaurant.cuisine.join(", ")} - {restaurant.approx_cost_for_two ? `${formatINR(restaurant.approx_cost_for_two)} for two` : "Cost not listed"}
+              <div className="flex min-w-0 items-start justify-between gap-3 rounded-lg">
+                <div className="min-w-0">
+                  <div className="truncate font-semibold">{restaurant.name}</div>
+                  <div className="truncate text-sm text-ink/60">
+                    {restaurant.area} - {restaurant.cuisine.join(", ")}
                   </div>
-                  <div className="mt-1 text-xs text-ink/45">
-                    {restaurant.active_offer_count ? `${restaurant.active_offer_count} offers available` : "Best deals available"} - {restaurant.match_reason}
+                  <div className="mt-1 truncate text-xs text-ink/50">
+                    {restaurant.approx_cost_for_two ? `${formatINR(restaurant.approx_cost_for_two)} for two` : "Cost not listed"} - {restaurant.active_offer_count ? `${restaurant.active_offer_count} offers available` : "Best deals available"}
                   </div>
+                  <div className="mt-1 truncate text-xs text-ink/40">{restaurant.match_reason}</div>
                 </div>
-                <div className="flex shrink-0 items-center gap-1 text-sm text-ink/70"><Star size={14} className="fill-amber text-amber" /> {restaurant.rating ?? "-"}</div>
+                <div className="flex shrink-0 items-center gap-1 rounded-full bg-cream px-2 py-1 text-sm font-semibold text-ink/70"><Star size={14} className="fill-amber text-amber" /> {restaurant.rating ?? "-"}</div>
               </div>
             );
             return onSelect ? (
@@ -180,12 +181,12 @@ export function RestaurantSearchCombobox({
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => choose(restaurant)}
                 onMouseEnter={() => setActiveIndex(index)}
-                className={`block w-full border-b border-ink/5 px-4 py-3 text-left ${index === activeIndex ? "bg-cream" : "hover:bg-cream"}`}
+                className={`block w-full rounded-lg px-3 py-3 text-left ${index === activeIndex ? "bg-cream" : "hover:bg-cream"}`}
               >
                 {content}
               </button>
             ) : (
-              <Link key={restaurant.id} href={`/restaurant/${restaurant.slug}`} className="block border-b border-ink/5 px-4 py-3 hover:bg-cream">
+              <Link key={restaurant.id} href={`/restaurant/${restaurant.slug}`} className="block rounded-lg px-3 py-3 hover:bg-cream">
                 {content}
               </Link>
             );

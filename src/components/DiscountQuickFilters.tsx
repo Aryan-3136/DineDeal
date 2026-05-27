@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BadgePercent, Landmark, Loader2, WalletCards } from "lucide-react";
+import { BadgePercent, Landmark, Loader2 } from "lucide-react";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
 import { LastCheckedBadge } from "./LastCheckedBadge";
@@ -11,7 +11,7 @@ import { formatINR } from "@/lib/money";
 import type { Offer } from "@/types/offer";
 import type { Restaurant } from "@/types/restaurant";
 
-type Filter = { label: string; type: "percent" | "flat" | "cashback" | "bank"; min?: number };
+type Filter = { label: string; type: "percent" | "flat" | "bank"; min?: number };
 type Result = {
   restaurant: Restaurant;
   offer: Offer;
@@ -23,14 +23,8 @@ type Result = {
 
 const filters: Filter[] = [
   { label: "10%+", type: "percent", min: 10 },
-  { label: "15%+", type: "percent", min: 15 },
   { label: "20%+", type: "percent", min: 20 },
-  { label: "25%+", type: "percent", min: 25 },
-  { label: "30%+", type: "percent", min: 30 },
-  { label: "40%+", type: "percent", min: 40 },
-  { label: "50%+", type: "percent", min: 50 },
   { label: "Flat Rs 500+", type: "flat", min: 500 },
-  { label: "Cashback", type: "cashback" },
   { label: "Bank Offers", type: "bank" }
 ];
 
@@ -72,16 +66,16 @@ export function DiscountQuickFilters() {
           <p className="hidden text-sm text-ink/65 md:mt-1 md:block">Find restaurants by current offer data and estimated savings on a Rs 3000 bill.</p>
         </div>
       </div>
-      <div className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-2 md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap md:grid md:grid-cols-4 md:gap-3">
         {filters.map((filter) => (
           <button
             key={`${filter.type}-${filter.min ?? filter.label}`}
             type="button"
             onClick={() => void load(filter)}
-            className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 md:min-h-11 md:gap-2 md:px-4 ${active.label === filter.label ? "border-leaf bg-leaf/10 text-leaf" : "border-ink/10 bg-white text-ink/75"}`}
+            className={`inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 md:min-h-11 md:gap-2 md:px-4 ${active.label === filter.label ? "border-leaf bg-leaf/10 text-leaf" : "border-ink/10 bg-white text-ink/75"}`}
           >
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cream text-leaf md:h-7 md:w-7">
-              {filter.type === "bank" ? <Landmark size={15} /> : filter.type === "cashback" ? <WalletCards size={15} /> : <BadgePercent size={15} />}
+              {filter.type === "bank" ? <Landmark size={15} /> : <BadgePercent size={15} />}
             </span>
             <span>{filter.label}</span>
           </button>
